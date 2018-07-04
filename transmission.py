@@ -36,11 +36,4 @@ class Transmission:
 
 
 if __name__ == "__main__":
-    b = Transmission()
-    b.set_gear(-1)
-    b.turns_engine = 350000
-    b.clutch_pedal()
-    print(b)
-    b.turns_engine = 10550000
-    b.clutch_pedal()
-    print(b)
+    pass
