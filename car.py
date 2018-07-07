@@ -1,7 +1,6 @@
 from engine import Engine
 from transmission import Transmission
 from wheels import Wheels
-import time
 
 
 class Car:
@@ -15,34 +14,37 @@ class Car:
         self.gasoline = 0.0
         self.oil = 0.0
         self.speed = 0.0
-        self.__time_start = 0
+        self.time = 0
+        self.transmission_health = 0
 
     def __repr__(self):
-        self.transforms()
         return "Данные автомобиля и поездки:\n" \
-               "\tзапущен = %s\n" \
-               "\tуровень топлива = %s л.\n" \
-               "\tуровень масла = %s %%\n" \
-               "\tскорость = %s км/ч\n" \
-               "\tпройденый путь = %s км" % (self.power, self.gasoline, self.oil, self.speed, self.path)
+               "\t запущен = %s\n" \
+               "\t уровень топлива = %s л.\n" \
+               "\t уровень масла = %s %%\n" \
+               "\t состояние КП = %s %%\n" \
+               "\t скорость = %s км/ч\n" \
+               "\t пройденый путь = %s км" % (self.power, self.gasoline, self.oil,
+                                              self.transmission_health, self.speed, self.path)
 
-    def transforms(self):  # соединение классов, получение данных для вывода
-            self.engine.time = self.power * (time.time() - self.__time_start)
-            self.transmission.turns_engine = self.engine.turns_engine()
-            self.wheels.turns_wheels = self.transmission.clutch_pedal()
-            self.power = self.engine.power
-            self.gasoline = self.engine.gasoline
-            self.oil = self.transmission.oil * 100
-            self.get_speed()
-            self.path = self.wheels.transform_path()
+    def get_car_data(self):  # соединение классов, получение данных для вывода
+        self.engine.time = self.time
+        self.transmission.turns_engine = self.engine.launch_engine()
+        self.wheels.turns_wheels = self.transmission.clutch_pedal()
+        self.power = self.engine.power
+        self.gasoline = self.engine.gasoline
+        self.oil = self.transmission.oil * 100
+        self.transmission_health = self.transmission.transmission_health * 100
+        self.get_speed()
+        self.path += self.wheels.transform_path()
+        self.time = 0
 
-    def turn_on(self):  # включить двигатель, начинаем отсчёт времени
+    def turn_on(self):  # включить двигатель
         try:
             self.engine.start_engine()
         except Exception as e:
             print("Авто не поедет, пока есть проблемы:\n %s" % e)
         else:
-            self.__time_start = time.time()
             print("Вжжжжжжжж-чух-чух-чух-чух")
 
     def turn_off(self):  # выключить двигатель
@@ -57,18 +59,22 @@ class Car:
         self.transmission.add_oil()
         print("Ты зашёл на ближайшую СТО и поменял масло. Какой молодец ^_^ ")
 
+    def repair_transmission(self):  # починить КП
+        self.transmission.repair_transmission()
+        print("Ты зашёл на ближайшую СТО и поменял КП. Какой молодец ^_^ ")
+
     def change_speed(self, gas=engine.gas, gear=transmission.gear):  # изменить скорость
-        self.transmission.gear = gear
-        self.engine.gas = gas
+        self.transmission.set_gear(gear)
+        self.engine.gas_pedal(gas)
         print("Теперь ты едешь на %s передаче и нажал газ на %s градусов. Какой молодец ^_^ " %
               (self.transmission.gear, self.engine.gas))
 
     def get_speed(self):  # расчитать скорость
-        try:
-            self.speed = self.engine.rpm * self.transmission.gear * self.wheels.wheel * 60
-        except Exception:
-            self.speed = 0
+        self.speed = self.engine.rpm * self.transmission.gear * self.wheels.wheel * 60
         return self.speed
+
+    def brake_pedal(self):  # остановить автомобиль
+        self.change_speed(1, 0)
 
 
 if __name__ == "__main__":
